@@ -28,8 +28,9 @@ type Tools struct {
 
 // JSONResponse struct TODO: Add description
 type JSONResponse struct {
-	Error   bool
-	Message string
+	Error   bool        `json:"error"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
 // RandomString returns a string which consists of a random assortment of characters. characters are defined in the constant randomStringSource
@@ -193,13 +194,6 @@ func (t *Tools) DownloadStaticFile(w http.ResponseWriter, r *http.Request, p, fi
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", displayName))
 
 	http.ServeFile(w, r, fp)
-}
-
-// JSOMResponse struct TODO: Add description
-type JSOMResponse struct {
-	Error   bool        `json:"error"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
 }
 
 // ReadJSON method TODO: Add description
