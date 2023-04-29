@@ -79,7 +79,7 @@ func (t *Tools) UploadFiles(r *http.Request, uploadDir string, rename ...bool) (
 	var uploadedFiles []*UploadedFile
 
 	if t.MaxFileSize == 0 {
-		t.MaxFileSize = 500 * (1024 * 1024)
+		t.MaxFileSize = 1024 * 1024 * 1024
 	}
 	fmt.Println(t.MaxFileSize)
 
@@ -88,7 +88,10 @@ func (t *Tools) UploadFiles(r *http.Request, uploadDir string, rename ...bool) (
 		return nil, err
 	}
 
-	r.ParseMultipartForm(int64(t.MaxFileSize))
+	err = r.ParseMultipartForm(int64(t.MaxFileSize))
+	if err != nil {
+		return nil, err
+	}
 
 	for _, fHeaders := range r.MultipartForm.File {
 		for _, hdr := range fHeaders {
@@ -129,23 +132,23 @@ func (t *Tools) UploadFiles(r *http.Request, uploadDir string, rename ...bool) (
 					return nil, errVal
 				}
 
-				uploadedFile.OriginalFileName = hdr.Filename
 				if renameFile {
 					uploadedFile.NewFileName = fmt.Sprintf("%s%s", t.RandomString(25), filepath.Ext(hdr.Filename))
-				} else {
-					uploadedFile.NewFileName = uploadedFile.OriginalFileName
 				}
+				uploadedFile.NewFileName = hdr.Filename
 
 				var outfile *os.File
 				defer outfile.Close()
+
 				if outfile, errVal = os.Create(filepath.Join(uploadDir, uploadedFile.NewFileName)); errVal != nil {
 					return nil, errVal
+				} else {
+					fileSize, errVal := io.Copy(outfile, infile)
+					if errVal != nil {
+						return nil, errVal
+					}
+					uploadedFile.FileSize = fileSize
 				}
-				fileSize, errVal := io.Copy(outfile, infile)
-				if errVal != nil {
-					return nil, errVal
-				}
-				uploadedFile.FileSize = fileSize
 				uploadedFiles = append(uploadedFiles, &uploadedFile)
 
 				return uploadedFiles, nil
