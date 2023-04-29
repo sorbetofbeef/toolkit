@@ -88,10 +88,7 @@ func (t *Tools) UploadFiles(r *http.Request, uploadDir string, rename ...bool) (
 		return nil, err
 	}
 
-	err = r.ParseMultipartForm(int64(t.MaxFileSize))
-	if err != nil {
-		return nil, errors.New("upload size is too large")
-	}
+	r.ParseMultipartForm(int64(t.MaxFileSize))
 
 	for _, fHeaders := range r.MultipartForm.File {
 		for _, hdr := range fHeaders {
