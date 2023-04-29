@@ -81,13 +81,14 @@ func (t *Tools) UploadFiles(r *http.Request, uploadDir string, rename ...bool) (
 	if t.MaxFileSize == 0 {
 		t.MaxFileSize = 500 * (1024 * 1024)
 	}
+	fmt.Println(t.MaxFileSize)
 
 	err := t.CreateDir(uploadDir)
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.ParseMultipartForm(t.MaxFileSize)
+	err = r.ParseMultipartForm(int64(t.MaxFileSize))
 	if err != nil {
 		return nil, errors.New("upload size is too large")
 	}
@@ -110,7 +111,7 @@ func (t *Tools) UploadFiles(r *http.Request, uploadDir string, rename ...bool) (
 
 				allowed := false
 				filetype := http.DetectContentType(buf)
-				t.AllowedFileTypes = []string{"image/png", "image/jpeg", "image/gif"}
+				t.AllowedFileTypes = []string{"image/webp", "image/png", "image/jpeg", "image/gif"}
 
 				if len(t.AllowedFileTypes) > 0 {
 					for _, ft := range t.AllowedFileTypes {
